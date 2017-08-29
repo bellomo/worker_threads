@@ -63,16 +63,16 @@ int main(int argc, char* argv[]) {
     }
   }
   catch(WorkerStateException& e) {
-      cout << e.what() << endl;
+    cout << e.what() << endl;
   }
 
   auto isWorkerRunning = [&] () -> bool {
-      bool run=false;
-      for(auto wk : workers) {
-	       run = run | wk->isRunning();
-       }
-      return run;
-    };
+    bool run=false;
+    for(auto wk : workers) {
+      run = run | wk->isRunning();
+    }
+    return run;
+  };
 
   while( isWorkerRunning() ) {
 
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
       if(tokens[0] == "status") {
         for(auto wk : workers)
- 	        cout<<"worker " << wk->id() << " status " << wk->printStatus() << endl;
+          cout<<"worker " << wk->id() << " status " << wk->printStatus() << endl;
       }
 
       else if(tokens[0] == "exit") {
@@ -103,20 +103,20 @@ int main(int argc, char* argv[]) {
         }
 
         try{
-	         int wId = atoi(tokens[1].c_str());
-	         if( wId > nb_threads_to_run)
-             throw WorkerCommandException{};
+          int wId = atoi(tokens[1].c_str());
+          if( wId > nb_threads_to_run)
+            throw WorkerCommandException{};
 
-           if(tokens[0] == "pause") {
-             workers[wId-1]->pause();
-	         }
-	         else if(tokens[0] == "restart") {
-	           workers[wId-1]->restart();
-	         }
-	         else if(tokens[0] == "stop") {
-	           workers[wId-1]->stop();
-	         }
-           else
+          if(tokens[0] == "pause") {
+            workers[wId-1]->pause();
+          }
+          else if(tokens[0] == "restart") {
+            workers[wId-1]->restart();
+          }
+          else if(tokens[0] == "stop") {
+            workers[wId-1]->stop();
+          }
+          else
             throw WorkerCommandException{};
           }
           catch(WorkerStateException& e){
@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
           }
         }
         else
-         throw WorkerCommandException{};
+          throw WorkerCommandException{};
       }
       catch(WorkerCommandException& e) {
         cout<<e.what()<<endl;
