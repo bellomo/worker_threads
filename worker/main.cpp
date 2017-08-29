@@ -69,10 +69,21 @@ int main(int argc, char* argv[]) {
 
   int nb_threads_to_run=0;
 
-  if(!strcmp(argv[1],"--threads"))
-    nb_threads_to_run = atoi(argv[2]);
-  else
+  try{
+    if(argc==3 && !strcmp(argv[1],"--threads")) {
+      string nb_threads_to_run_string = argv[2];
+      if( nb_threads_to_run_string.find_first_not_of( "0123456789" ) == string::npos )
+        nb_threads_to_run = atoi(nb_threads_to_run_string.c_str());
+      else
+        throw WorkerCommandException{};
+    }else{
+      throw WorkerCommandException{};
+    }
+  }
+  catch(WorkerCommandException& e) {
     helper();
+    return 0;
+  }
 
   vector<worker*> workers;
 

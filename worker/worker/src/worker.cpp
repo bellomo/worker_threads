@@ -27,6 +27,7 @@ void worker::start(int id) {
   m_thread = std::thread(m_func, this);
   m_status = worker::threadStatus::running;
   m_id = id;
+  acout{} << "worker " << m_id << " started" << std::endl;
 }
 
 void worker::wait() {
