@@ -146,24 +146,25 @@ int main(int argc, char* argv[]) {
 
 
 
+/* Prossible extension wit a workerTask class derived from worker
+   with a member function to be executed in the thread defined as
+   below where runTask1, runTask2, ecc are steps of the thread tasks
+   where pauses or stops are allowed.
 
-// Task : worker
+   runTask {
 
-// runTask
-// {
+     runTask1();
 
-//   runTask1()
+     wait();
+     if(forceStop()) return;
 
-//    wait
-//     stop
+     runTask2();
 
-//     runTask2()
+     wait();
+     if(forceStop()) return;
 
-//     wait
-//     stop
+      ...
 
-//     ...
-
-
-
-// }
+     finalize();
+  }
+*/
