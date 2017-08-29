@@ -101,6 +101,8 @@ std::string worker::printStatus() {
     return "finished";
   case worker::threadStatus::stopped :
     return "stopped";
+  case worker::threadStatus::joined :
+    return "joined";
   default :
     return "underfined";
   }
