@@ -1,18 +1,41 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
+#include <chrono>
+#include <ctime>
 #include <worker/worker.h>
 #include <worker/exceptions.h>
 using namespace std;
 
-void doSomething(worker* t) {
+void doWriteFile(worker* w) {
+  stringstream workerIdStringStream;
+  workerIdStringStream << w->id();
+  ofstream logfile (("worker_id"+workerIdStringStream.str()+"_heartbeat.txt").c_str());
+  if (logfile.is_open()) {
+    while (true) {
+      auto time_point = chrono::system_clock::now();
+      time_t now_c = chrono::system_clock::to_time_t(time_point);
+      logfile << "Worker Id " << w->id() <<" : "<< ctime(&now_c) << endl;
+      w->wait();
+      if(w->forceStop()) {
+        logfile.close();
+        w->finalize();
+        return;
+      }
+      this_thread::sleep_for(chrono::milliseconds(1000));
+    }
+  }
+}
+
+void doLongLoop(worker* w) {
   int tot=0;
   int ncycles=10000;
   for(int i=0; i<ncycles; ++i) {
     for(int j=0; j<ncycles; ++j) {
 
-      t->wait();
+      w->wait();
 
-      if(t->forceStop())
+      if(w->forceStop())
 	     return;
 
       for(int k=0; k<ncycles; ++k) {
@@ -23,7 +46,7 @@ void doSomething(worker* t) {
     }
   }
 
-  t->finalize();
+  w->finalize();
 }
 
 void helper() {
@@ -54,7 +77,8 @@ int main(int argc, char* argv[]) {
   vector<worker*> workers;
 
   for(int i=0; i<nb_threads_to_run; ++i) {
-    workers.push_back ( new worker(doSomething) );
+    //workers.push_back ( new worker(doLongLoop) );
+    workers.push_back ( new worker(doWriteFile) );
   }
 
   try{
