@@ -26,7 +26,6 @@ public:
   int id();
 
 private:
-
   int m_id;
   threadStatus m_status;
   threadFunc  m_func;

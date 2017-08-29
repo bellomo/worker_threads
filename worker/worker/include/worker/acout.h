@@ -4,15 +4,13 @@
 #include <sstream>
 
 class acout : public std::ostringstream {
-public:
+  public:
+    acout() = default;
+    ~acout() {
+      std::lock_guard<std::mutex> guard(_mutexCout);
+      std::cout << this->str();
+    }
 
-  acout() = default;
-
-  ~acout() {
-    std::lock_guard<std::mutex> guard(_mutexCout);
-    std::cout << this->str();
-  }
-
-private:
-  static std::mutex _mutexCout;
+  private:
+    static std::mutex _mutexCout;
 };
