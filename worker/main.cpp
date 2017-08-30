@@ -49,6 +49,7 @@ void doLongLoop(worker* w) {
   w->finalize();
 }
 
+// Helper function for program
 void helper() {
   cout<<"Usage : program --help         # print this helper"<<endl;
   cout<<"                --threads N    # start N worker threads"<<endl<<endl;
@@ -60,6 +61,7 @@ void helper() {
   cout<<"                exit         # stop all worker threads and terminate program"<<endl;
 }
 
+
 int main(int argc, char* argv[]) {
 
   if( argc==1 || ( argc==2 && !strcmp(argv[1],"--help") ) ) {
@@ -68,7 +70,6 @@ int main(int argc, char* argv[]) {
   }
 
   int nb_threads_to_run=0;
-
   try{
     if(argc==3 && !strcmp(argv[1],"--threads")) {
       string nb_threads_to_run_string = argv[2];
@@ -85,13 +86,14 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
+  // create the workers
   vector<worker*> workers;
-
   for(int i=0; i<nb_threads_to_run; ++i) {
-    //workers.push_back ( new worker(doLongLoop) );
-    workers.push_back ( new worker(doWriteFile) );
+    workers.push_back ( new worker(doLongLoop) );
+    //workers.push_back ( new worker(doWriteFile) );
   }
 
+  // start the threads
   try{
     for(int i=0; i<nb_threads_to_run; ++i) {
       workers[i]->start(i+1);
@@ -101,15 +103,16 @@ int main(int argc, char* argv[]) {
     cout << e.what() << endl;
   }
 
-  auto isWorkerRunning = [&] () -> bool {
+  // start the interactive session
+  auto isWorkerRunningOrPaused = [&] () -> bool {
     bool run=false;
     for(auto wk : workers) {
-      run = run | wk->isRunning();
+      run = run | (wk->state(worker::threadStatus::running) | wk->state(worker::threadStatus::paused));
     }
     return run;
   };
 
-  while( isWorkerRunning() ) {
+  while( isWorkerRunningOrPaused() ) {
 
     try{
       string command="";
@@ -123,7 +126,7 @@ int main(int argc, char* argv[]) {
 
       if(tokens[0] == "status") {
         for(auto wk : workers)
-          cout<<"worker " << wk->id() << " status " << wk->printStatus() << endl;
+          cout << "worker " << wk->id() << " status " << wk->printStatus() << endl;
       }
 
       else if(tokens[0] == "exit") {
@@ -168,11 +171,21 @@ int main(int argc, char* argv[]) {
       }
   }
 
+  // join for still running threads
+  auto isWorkerRunning = [&] () -> bool {
+    bool run=false;
+    for(auto wk : workers) {
+      run = run | wk->state(worker::threadStatus::running);
+    }
+    return run;
+  };
+
   if(isWorkerRunning()) {
     for(auto wk : workers)
       wk->join();
   }
 
+  // cleanup workers
   for(auto wk : workers)
       delete wk;
 
@@ -181,7 +194,9 @@ int main(int argc, char* argv[]) {
 
 
 
-/* Prossible extension wit a workerTask class derived from worker
+/* Prossible extensions:
+
+   1/ A workerTask class derived from worker
    with a member function to be executed in the thread defined as
    below where runTask1, runTask2, ecc are steps of the thread tasks
    where pauses or stops are allowed.
@@ -201,5 +216,13 @@ int main(int argc, char* argv[]) {
       ...
 
      finalize();
+
+     2/ A WorkerPool class handling the creating of workers,
+     the state changing operations, the joins and memory cleaning
+
+     3/ A InteractiveSession class handling the interaction with
+     standard input to receive commands for worker state changes.
+     This class could run the interactive session in its own thread
+     separating it from the main program execution.
   }
 */

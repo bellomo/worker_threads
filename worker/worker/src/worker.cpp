@@ -76,9 +76,9 @@ void worker::join() {
   }
 }
 
-bool worker::isRunning() {
+bool worker::state(worker::threadStatus s) {
   std::unique_lock<std::mutex> lock(m_mutex);
-  return (m_status == worker::threadStatus::running);
+  return (m_status == s);
 }
 
 void worker::finalize() {

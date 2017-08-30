@@ -19,7 +19,7 @@ public:
   void pause();
   void restart();
   void join();
-  bool isRunning();
+  bool state(worker::threadStatus s);
   void finalize();
   threadStatus status();
   std::string printStatus();
