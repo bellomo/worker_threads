@@ -5,9 +5,10 @@
 
 TEST(aWorker, WorkerMissingStart)
 {
-  ASSERT_NO_THROW({
+  ASSERT_ANY_THROW({
     auto func = [] (worker*) {return;};
     worker w(func);
+    w.join();
   });
 }
 
@@ -20,12 +21,13 @@ TEST(aWorker, WorkerStartInitialization)
   ASSERT_EQ(w.status(), worker::threadStatus::running);
 }
 
-TEST(aWorker, WorkerStartWhenNotReady)
+TEST(aWorker, WorkerStartWhenReady)
 {
   ASSERT_NO_THROW({
     auto func = [] (worker*) {return;};
     worker w(func);
     w.start(1);
+    w.join();
   });
 }
 
@@ -35,6 +37,7 @@ TEST(aWorker, WorkerPauseWithoutStart)
     auto func = [] (worker*) {return;};
     worker w(func);
     w.pause();
+    w.join();
   });
 }
 
@@ -82,4 +85,14 @@ TEST(aWorker, TwoWorkersTask)
   w2.join();
   ASSERT_EQ(addval1,1);
   ASSERT_EQ(addval2,2);
+}
+
+void emptyFunc(worker*) {};
+TEST(aWorker, EmptyTask)
+{
+  ASSERT_NO_THROW({
+    worker w(emptyFunc);
+    w.start(1);
+    w.join();
+  });
 }
